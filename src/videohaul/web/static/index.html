@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-interface-mode="simple">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VideoHaul</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div id="app"><div id="notifications" class="notifications" aria-live="polite"></div>
+<header>
+<div class="brand">VideoHaul</div>
+<nav><button data-tab="main" class="tab active">Downloads</button><button data-tab="batch" class="tab">Batch</button><button data-tab="history" class="tab">History</button><button data-tab="settings" class="tab">Settings</button></nav>
+</header>
+<main>
+<section id="main-tab" class="panel active">
+<div class="add-row"><input id="main-url" placeholder="Paste a video URL"><button id="analyze-main" class="primary">Analyze</button><button id="add-more">+ Add more videos</button></div>
+<div id="duplicate-bar" class="duplicate-bar" hidden><span id="duplicate-message"></span><button id="duplicate-add-anyway">Add anyway</button><button id="duplicate-dismiss">Dismiss</button></div>
+<div class="toolbar"><span id="summary">Active 0 • 0 B/s</span><span class="spacer"></span><button id="pause-all">Pause all</button><button id="resume-all">Resume all</button><button id="stop-all">Stop all</button><button id="collapse-all">Collapse all</button><button id="expand-all">Expand all</button><button id="bulk-toggle" aria-pressed="false">Bulk mode</button><button id="delete-all">Delete all</button><button id="refresh-now">Refresh</button><label class="switch-label">Compact <input id="compact-toggle" type="checkbox"><span class="switch"></span></label></div>
+<details id="job-search-tools" class="job-search-tools" hidden><summary>Search and filter jobs</summary><div><input id="job-search" placeholder="Search title, creator, platform or URL"><select id="job-filter"><option value="all">All states</option><option value="active">Active</option><option value="queued">Queued</option><option value="paused">Paused</option><option value="failed">Failed or unresolved</option><option value="done">Done</option></select><span id="job-search-summary"></span></div></details>
+<div id="bulk-bar" class="bulk-bar" hidden><span id="bulk-count">0 selected</span><button id="bulk-select-all">Select all</button><button id="bulk-select-none">Select none</button><button id="bulk-start">Start</button><button id="bulk-pause">Pause</button><button id="bulk-resume">Resume</button><button id="bulk-stop">Stop</button><button id="bulk-pin">Pin</button><label>Destination<input id="bulk-destination" placeholder="Folder"></label><button id="bulk-apply-destination">Change destination</button><label>Speed limit<input id="bulk-speed" type="number" min="0" placeholder="MB/s"></label><button id="bulk-apply-speed">Change speed</button><label>Priority<select id="bulk-priority"><option value="high">High</option><option value="normal" selected>Normal</option><option value="low">Low</option></select></label><button id="bulk-apply-priority">Change priority</button><button id="bulk-delete">Delete</button></div>
+<div id="jobs"></div>
+</section>
+<section id="batch-tab" class="panel">
+<div class="batch-layout">
+<div class="batch-card">
+<h2>Batch</h2>
+<label>Playlist or URL list<textarea id="batch-input" rows="7" placeholder="Paste a playlist URL or one URL per line"></textarea></label>
+<div class="batch-inline"><label class="file-button">Import .txt<input id="batch-file" type="file" accept=".txt,text/plain"></label><button id="batch-reset">Reset</button></div>
+<label>Selection range<input id="batch-range" placeholder="1-10,14,20-30"></label>
+<label>Shared quality<select id="batch-quality"><option value="best">Best available</option><option value="recommended">Recommended</option><option value="2160p">2160p</option><option value="1440p">1440p</option><option value="1080p">1080p</option><option value="720p">720p</option><option value="480p">480p</option><option value="360p">360p</option><option value="audio_only">Audio only</option></select></label>
+<label>Audio languages<input id="batch-audio-languages" placeholder="Optional: en, es"></label>
+<label>Subtitle languages<input id="batch-subtitle-languages" placeholder="Optional: en, es"></label>
+<label>Destination<input id="batch-destination"></label>
+<label>Filename template<input id="batch-filename" value="%(playlist_index)03d - %(title)s.%(ext)s"></label>
+<label>Audio output<select id="batch-audio-output"><option value="source">Source</option><option value="aac">AAC</option><option value="opus">Opus</option><option value="mp3">MP3</option><option value="flac">FLAC</option></select></label>
+<label>Subtitle mode<select id="batch-subtitle-mode"><option value="external">External files</option><option value="embed">Embed</option><option value="both">External + embedded</option></select></label>
+<label>Subtitle format<select id="batch-subtitle-format"><option value="best">Best available</option><option value="srt">SRT</option><option value="vtt">VTT</option><option value="ass">ASS</option></select></label>
+<label>Speed limit MB/s<input id="batch-speed" type="number" min="0" step="0.1" placeholder="Unlimited"></label>
+<label>Notify on completion<input id="batch-notify" type="checkbox" checked></label>
+<label>Completion sound<input id="batch-sound" type="checkbox"></label>
+<label>Completion action<select id="batch-completion"><option value="none">None</option><option value="open_file">Open file</option><option value="open_folder">Open folder</option><option value="play_file">Play file</option><option value="move_file">Move file</option><option value="custom_command">Run custom command</option><option value="sleep">Sleep</option><option value="shutdown">Shutdown</option></select></label>
+<label>Move destination<input id="batch-move-destination" placeholder="Folder to move each finished file into"></label>
+<label>Custom command<input id="batch-custom-command" placeholder="tool --input {output}"></label>
+<label>Preserve metadata<input id="batch-metadata" type="checkbox" checked></label>
+<label>Preserve chapters<input id="batch-chapters" type="checkbox" checked></label>
+<div class="batch-inline"><button id="batch-analyze" class="primary">Analyze batch</button><button id="batch-apply-shared">Apply shared settings</button></div><div id="batch-activity" class="batch-activity" data-state="idle" aria-live="polite">Ready to analyze a batch</div>
+</div>
+<div class="batch-card batch-results">
+<div class="batch-toolbar"><button id="batch-select-all">Select all</button><button id="batch-select-none">Select none</button><button id="batch-invert">Invert</button><button id="batch-apply-range">Apply range</button><span id="batch-count">0 selected</span></div>
+<div id="batch-totals" class="batch-totals">No batch analyzed</div>
+<div id="batch-exceptions"></div>
+<div id="batch-items"></div>
+<button id="batch-commit" class="primary">Add selected jobs to queue</button>
+</div>
+</div>
+</section>
+<section id="history-tab" class="panel"><div class="history-card"><div class="history-toolbar"><input id="history-search" placeholder="Search title, platform, URL, filename or creator"><button id="history-refresh">Refresh</button><button id="history-clear">Clear history</button></div><div id="history-summary">No history loaded</div><div id="history-items"></div></div></section>
+<section id="settings-tab" class="panel">
+<div class="settings-card">
+<div class="settings-mode-heading"><div><h2 id="settings-mode-title">Settings</h2><p>Simple mode shows everyday defaults. Advanced mode adds stream, recovery, network and dependency controls.</p></div><label>Interface <select id="interface-mode"><option value="simple">Simple</option><option value="advanced">Advanced</option></select></label></div>
+<div class="settings-grid">
+<label>Theme <select id="theme"><option value="dark">Dark</option><option value="light">Light</option><option value="balanced">Balanced</option></select></label>
+<label>Default download folder<input id="default-folder" list="recent-folders"></label><datalist id="recent-folders"></datalist>
+<label>Auto-organize downloads<select id="default-organize"><option value="none">None</option><option value="creator">Creator/channel</option><option value="platform">Platform</option><option value="date">Year</option><option value="playlist">Playlist</option></select></label>
+<label>Preferred quality <select id="default-quality"><option value="best">Best available</option><option value="recommended">Recommended</option><option value="2160p">Prefer 2160p</option><option value="1080p60">Prefer 1080p60</option><option value="1080p">Prefer 1080p</option><option value="720p">Prefer 720p</option><option value="preset:phone">Phone</option><option value="preset:tv">TV</option><option value="preset:archive">Archive</option><option value="preset:editing">Editing</option><option value="preset:small_file">Small file</option></select></label>
+<label>Maximum simultaneous downloads<input id="max-concurrent" type="number" min="1" max="64" value="3"></label>
+<label>Global speed limit MB/s<input id="global-speed" type="number" min="0" step="0.1" placeholder="Unlimited"></label>
+<label class="settings-check"><input id="global-notifications" type="checkbox" checked><span>Notifications</span></label>
+<label class="settings-check"><input id="global-completion-sound" type="checkbox"><span>Completion sound</span></label>
+<label>Default completion action<select id="default-completion-action"><option value="none">None</option><option value="open_file">Open file</option><option value="open_folder">Open folder</option><option value="play_file">Play file</option><option value="move_file">Move file</option><option value="custom_command">Run custom command</option><option value="sleep">Sleep</option><option value="shutdown">Shutdown</option></select></label>
+<label class="settings-check"><input id="show-thumbnails" type="checkbox" checked><span>Show thumbnails</span></label>
+<label class="settings-check"><input id="embed-thumbnail-default" type="checkbox" checked><span>Embed source thumbnail in downloads by default</span></label><label class="settings-check"><input id="comment-tag-default" type="checkbox" checked><span>Add &quot;Downloaded by VideoHaul.&quot; to the file comment tag by default</span></label>
+<label class="settings-check"><input id="auto-collapse-completed" type="checkbox"><span>Auto-collapse completed</span></label>
+<label class="settings-check"><input id="auto-expand-failed" type="checkbox" checked><span>Auto-expand failed</span></label>
+<label class="settings-check"><input id="settings-compact" type="checkbox"><span>Compact cards</span></label>
+<label class="settings-check"><input id="history-enabled" type="checkbox" checked><span>Save completed downloads to History</span></label>
+</div>
+<div class="settings-section" data-settings-level="advanced"><h3>Advanced media defaults</h3><div class="settings-grid"><label>Filename template<input id="default-filename-template"></label><label>Container<select id="default-container"><option value="auto">Automatic</option><option value="source">Source</option><option value="mp4">MP4</option><option value="mkv">MKV</option><option value="webm">WebM</option></select></label><label>Preferred video codec<select id="default-preferred-codec"><option value="auto">Automatic</option><option value="h264">H.264</option><option value="h265">H.265/HEVC</option><option value="vp9">VP9</option><option value="av1">AV1</option></select></label><label>Subtitle format<select id="default-subtitle-format"><option value="best">Best available</option><option value="srt">SRT</option><option value="vtt">VTT</option><option value="ass">ASS</option></select></label><label class="settings-check"><input id="default-preserve-metadata" type="checkbox" checked><span>Preserve metadata</span></label><label class="settings-check"><input id="default-preserve-chapters" type="checkbox" checked><span>Preserve chapters</span></label><label class="settings-check"><input id="default-keep-originals" type="checkbox"><span>Keep original source streams</span></label></div></div>
+<div class="settings-section" data-settings-level="advanced"><h3>Advanced recovery and network</h3><div class="settings-grid"><label>Bandwidth mode<select id="fair-share"><option value="equal">Share equally</option><option value="finish_one_fastest">Finish one fastest</option><option value="prioritize_selected">Prioritize selected job</option></select></label><label>Retry count<input id="default-max-retries" type="number" min="0" max="20"></label><label>Retry backoff seconds<input id="default-retry-backoff" type="number" min="0" step="0.1"></label><label>Failed partial files<select id="default-partial-cleanup"><option value="keep">Keep</option><option value="remove">Remove</option><option value="ask">Ask after a failure</option></select></label><label>Browser cookies/session<input id="default-browser-cookies" list="global-cookie-sources"><datalist id="global-cookie-sources"><option value="none"><option value="chrome"><option value="chromium"><option value="firefox"><option value="edge"><option value="brave"><option value="opera"><option value="vivaldi"></datalist></label></div></div>
+<div class="settings-section" data-settings-level="advanced"><h3>Advanced completion and desktop</h3><div class="settings-grid"><label>Move destination<input id="default-move-destination"></label><label>Custom command<input id="default-custom-command" placeholder="tool --input {output}"></label><label class="settings-check"><input id="minimize-to-tray" type="checkbox"><span>Minimize to tray while downloading</span></label></div></div>
+<div class="settings-section"><h3>Diagnostics</h3><p>Inspect this application session by default, with older retained events available separately.</p><button id="open-diagnostics">Open diagnostics</button></div>
+<div class="settings-section" data-settings-level="advanced"><h3>Dependencies</h3><p>Managed engines are validated and reused. Nothing is downloaded unless it is missing, broken or incompatible.</p><div id="dependency-health" class="dependency-health">Not checked yet</div><div class="settings-inline"><button id="dependency-check">Check health</button><button id="dependency-update">Update selected</button><button id="dependency-rollback">Roll back selected</button></div><label>Managed engine<select id="dependency-name"><option value="yt_dlp">yt_dlp</option><option value="ffmpeg">ffmpeg</option><option value="deno">deno</option><option value="streamlink">streamlink</option><option value="chromium">chromium</option></select></label></div>
+<div class="settings-section" data-settings-level="advanced"><h3>Application updates</h3><p>Update checks are unobtrusive and never block startup.</p><label class="settings-check"><input id="app-update-checks" type="checkbox" checked><span>Application update checks</span></label><label>Release feed URL<input id="update-source-url" type="url"></label><div id="update-status">Not checked yet</div><button id="check-updates">Check for updates</button></div>
+<div class="settings-section" data-settings-level="advanced"><h3>Media Detector</h3><p>Open a page in a real Chromium session and watch for media that only appears after interaction.</p><label>Page URL<input id="detector-url" placeholder="https://example.com/watch/123"></label><button id="open-detector">Open in Media Detector</button></div>
+</div>
+</section>
+</main>
+<div id="drawer" class="drawer"><button id="drawer-close">×</button><div id="drawer-content"></div></div>
+<dialog id="detector-window" class="detector-window"><div class="detector-head"><div><h2>Media Detector</h2><div id="detector-page" class="detector-page"></div><div id="detector-summary"></div></div><button id="detector-close">×</button></div><div class="detector-actions"><button id="detector-refresh">Refresh</button><button id="detector-stop">Stop watching</button><button id="detector-rejected" hidden>Show rejected</button></div><div id="detector-body" class="detector-body"></div></dialog>
+<dialog id="diagnostics-window" class="diagnostics-window"><div class="diagnostics-head"><div><h2>Diagnostics</h2><div id="diagnostics-summary"></div></div><button id="diagnostics-close">×</button></div><div class="diagnostics-actions"><label class="field-inline">Show <select id="diagnostics-scope"><option value="session">This session</option><option value="all">All recorded sessions</option></select></label><button id="diagnostics-refresh">Refresh</button><button id="diagnostics-copy">Copy log</button><button id="diagnostics-clear">Clear log</button><button id="diagnostics-export">Export report</button></div><pre id="diagnostics-log"></pre></dialog>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

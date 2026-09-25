@@ -1,0 +1,3 @@
+include LICENSE NOTICE THIRD_PARTY_NOTICES.md README.md
+recursive-include docs/assets *.png
+recursive-include src/videohaul/web/static *

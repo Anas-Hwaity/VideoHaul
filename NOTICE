@@ -1,0 +1,24 @@
+VideoHaul
+Copyright (c) 2026 Anas Al Hwaity
+
+This product is distributed under the MIT License. See LICENSE for the full text.
+
+VideoHaul is a media downloader that orchestrates external, independently
+licensed engines. It does not bundle or redistribute them. Each managed engine
+is installed once into a persistent per-user location, validated before reuse,
+and downloaded again only when it is missing, broken, or incompatible.
+
+The managed engines and browser runtime VideoHaul can install or reuse are listed
+in THIRD_PARTY_NOTICES.md together with their own licenses and project homepages.
+Those components remain the property of their respective authors and are governed
+by their own license terms, not by this project's license.
+
+VideoHaul does not circumvent digital rights management, subscription controls,
+authentication the user does not already possess, or any other access control.
+The interactive Media Detector observes an ordinary browser session that the
+user drives themselves; it neither decrypts protected media nor bypasses the
+protections a site applies.
+
+Users are responsible for ensuring that their use of VideoHaul complies with the
+terms of service of the sites they access and with the copyright law of their
+jurisdiction.
